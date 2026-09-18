@@ -1,0 +1,19 @@
+[Unit]
+Description=Whisper STT Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=@PROJECT@
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=@PYTHON@ @PROJECT@/run_whisper_server.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,27 @@
+{
+  "devices": {
+    "example_light": {
+      "type": "lights",
+      "invocations": [
+        "example light"
+      ],
+      "actions": {
+        "on": {
+          "topic": "example/light/set",
+          "payload": "ON"
+        },
+        "off": {
+          "topic": "example/light/set",
+          "payload": "OFF"
+        },
+        "set_level": {
+          "topic": "example/light/level",
+          "payload_template": "{value}",
+          "value_min": 0,
+          "value_max": 1,
+          "value_decimals": 2
+        }
+      }
+    }
+  }
+}

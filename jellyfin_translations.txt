@@ -1,0 +1,9 @@
+# Voice-to-text translation mappings for Jellyfin search.
+# Format: misheard_word1, misheard_word2 = correct_word
+# Lines starting with # are ignored.
+# Applied to ALL Jellyfin search queries (artists, albums, tracks, playlists).
+# NOTE: only add STT mishearings here (e.g. "cause"→"corrs").
+# Stylized names (P!nk) are handled automatically via character variants.
+
+cause, because = corrs
+seer, see yah, see ya, sear, seeya = sia

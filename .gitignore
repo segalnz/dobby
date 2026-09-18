@@ -1,0 +1,38 @@
+# Local configuration and private runtime data
+credentials.py
+.assistant.env
+device_registry.json
+sensor_registry.json
+state/
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+test_reports/
+testwavs/
+data/
+# Provisioned sources and model assets
+whisper/
+models/
+# Historical generated templates; the supported cache is state/responses/.
+dobby_responses.json
+dobby_responses.json.*
+dobby_fresh*.json
+dobby_*fresh*.json
+dobby_templates*.json
+dobby_smart_home*.json
+smart_home_templates*.json
+templates*.json
+templates/
+templates_sh/
+# Legacy local utility directory
+scripts/
+
+# Additional local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx

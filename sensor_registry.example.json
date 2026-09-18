@@ -1,0 +1,12 @@
+{
+  "sensors": {
+    "example_temperature": {
+      "active": true,
+      "invocations": [
+        "example temperature"
+      ],
+      "topic": "example/sensor/temperature",
+      "value_expr": "json:temperature"
+    }
+  }
+}

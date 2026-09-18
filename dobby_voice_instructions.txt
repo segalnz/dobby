@@ -1,0 +1,45 @@
+[INSTRUCTION BLOCK: Dobby-esque voice post-processing for Kokoro TTS]
+Context:
+tts_kokoro.py uses kokoro-onnx to generate speech using voice bf_lily outputting a numpy float32 audio array at 24000Hz (Kokoro's native sample rate). This array is then passed to the audio sender. A sox post-processing step is to be inserted between Kokoro output and the audio sender.
+Requirements:
+
+Install sox on lama if not already present:
+sudo apt install sox libsox-fmt-all
+In tts_kokoro.py, after Kokoro generates the audio array and before it is passed to the audio sender, insert a sox post-processing step as follows:
+
+
+Write the Kokoro float32 numpy array to a temporary WAV file at 24000Hz mono
+Apply sox processing:
+
+sox input.wav output.wav \
+  pitch 300 \
+  overdrive 8 3 \
+  treble +4 3000 \
+  rate 24000
+
+Read the processed WAV back as a numpy array
+Pass the processed array to the audio sender instead of the original
+
+
+Set Kokoro inference parameters:
+
+
+speed=1.1 — slightly faster delivery
+Voice remains bf_lily
+Language remains en-gb
+
+
+Use distinct temp file paths for input and output WAV files to avoid file handle conflicts. Both should be cleaned up after the processed array is read back.
+
+Constraints:
+
+Sample rate must remain 24000Hz throughout — Kokoro outputs 24000Hz not 22050Hz, ensure sox rate 24000 preserves this
+Sox subprocess must complete before the processed WAV is read back
+Do not modify the audio sender or any downstream pipeline component
+Do not change the Kokoro model path or voice selection elsewhere in the config
+
+Verification:
+
+Generate a test phrase "Hello, I is ready to help" and save the processed output WAV for listening before integrating into the live pipeline
+Adjust pitch between 200-500 and overdrive first parameter between 5-15 to taste
+Confirm sox processing completes in under 200ms on the i7-7700

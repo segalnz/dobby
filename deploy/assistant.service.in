@@ -1,0 +1,19 @@
+[Unit]
+Description=Voice Assistant Pipeline
+After=network-online.target whisper-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@USER@
+WorkingDirectory=@PROJECT@
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=@PYTHON@ @PROJECT@/pipeline.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
