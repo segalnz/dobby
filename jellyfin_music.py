@@ -48,10 +48,19 @@ except OSError:
 
 # ── Jellyfin HTTP client ─────────────────────────────────────────────
 
+class JellyfinError(ValueError):
+    """A safe, user-facing API failure, distinct from an empty library result."""
+
+
 class JellyfinClient:
     def __init__(self, server_url=JELLYFIN_SERVER_URL, api_key=JELLYFIN_API_KEY):
         self._server = server_url.rstrip('/')
-        self._headers = {'X-Emby-Token': api_key}
+        # Use the full MediaBrowser authorization scheme for API and audio requests.
+        # Some servers reject the legacy X-Emby-Token header with HTTP 401.
+        self._headers = {'Authorization': (
+            'MediaBrowser Client="Dobby", Device="Assistant", '
+            'DeviceId="dobby", Version="1.0", Token=' + json.dumps(api_key)
+        )}
 
     def _get(self, path, params=None):
         query = ''
@@ -71,10 +80,12 @@ class JellyfinClient:
                 return json.loads(resp.read().decode())
         except urllib.error.HTTPError as e:
             log.error('Jellyfin HTTP %s on %s: %s', e.code, path, e.reason)
-            return None
+            if e.code in (401, 403):
+                raise JellyfinError("Jellyfin rejected my API key. Please check the Jellyfin credentials.") from None
+            raise JellyfinError("Jellyfin could not complete the request. Please try again later.") from None
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
             log.error('Jellyfin request failed %s: %s', path, e)
-            return None
+            raise JellyfinError("I couldn't reach Jellyfin or read its response. Please try again later.") from None
 
     def search(self, query, item_types=None):
         if item_types is None:
@@ -254,6 +265,14 @@ class MusicController:
     # ── main entry ──────────────────────────────────────────────────
 
     def handle_command(self, text):
+        try:
+            return self._handle_command(text)
+        except JellyfinError as exc:
+            response = str(exc)
+            self._speak(response)
+            return ('error', response)
+
+    def _handle_command(self, text):
         import re
         text = re.sub(r'\s+', ' ', text.replace(",", " ").replace("\n", " ")).strip().lstrip('-\u0022\u0027*#').rstrip('.?!,;:')
         m_standalone = self._STANDALONE_PATTERNS.match(text)
@@ -498,6 +517,8 @@ class MusicController:
             self._artist_names_cache = sorted(set(items))
             log.info('Loaded %d artist names from Jellyfin', len(self._artist_names_cache))
             return self._artist_names_cache
+        except JellyfinError:
+            raise
         except Exception:
             log.warning('Failed to load artist names from Jellyfin')
             return []

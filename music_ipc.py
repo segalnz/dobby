@@ -47,7 +47,9 @@ def dispatch_music(music, request):
             result = music.handle_command(text)
             if result is None:
                 return {'ok': False, 'error': 'Music command could not be handled'}
-            _, response = result
+            outcome, response = result
+            if outcome == 'error':
+                return {'ok': False, 'error': response}
         return {'ok': True, 'response': response, 'state': music.state,
                 'queue_length': len(music.queue)}
 

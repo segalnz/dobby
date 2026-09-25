@@ -197,3 +197,17 @@ model binaries are excluded. Private development snapshots remain outside this r
 See [repository preparation](docs/repository-preparation.md) for the export process.
 Dependency pins, model hashes, and sanitized examples are provided. A project license
 and exact firmware revisions remain owner/release decisions.
+
+### Jellyfin authentication troubleshooting
+
+Dobby uses a `MediaBrowser` Authorization header for both searches and audio
+streams. Servers may reject the legacy `X-Emby-Token` header even with a valid key.
+If Jellyfin rejects authentication (HTTP 401/403), Dobby reports a credentials error;
+this does not mean the requested artist is missing. Create a key in Jellyfin's
+Dashboard → API Keys and set `JELLYFIN_API_KEY` in the private `credentials.py`.
+Restart `assistant.service` after changing it, because credentials are loaded at
+startup. Never commit the key. Check access without starting playback:
+
+```bash
+python jellyfin_cli.py --json search --query "Pink Floyd"
+```
